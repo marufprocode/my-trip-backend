@@ -1,15 +1,14 @@
-import { Request, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import catchAsync from '../../../shared/HOF/catchAsync';
 import sendResponse from '../../../shared/utilities/sendResponse';
 import { IUser } from '../users/users.interface';
 import httpStatus from 'http-status';
 import authService from './auth.service';
-import config from '../../../config';
 import { ILoginUserResponse, IRefreshTokenResponse } from './auth.interface';
 
-const createUser = catchAsync(async (req: Request, res: Response) => {
+const signUp = catchAsync(async (req: Request, res: Response) => {
   const user = req.body;
-  const result = await authService.createUserToDB(user);
+  const result = await authService.signUpUserToDB(user);
   sendResponse<IUser>(res, {
     statusCode: httpStatus.CREATED,
     success: true,
@@ -23,10 +22,29 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
   const result = await authService.loginUser(loginData);
   const { refreshToken, ...others } = result;
 
-  // set refresh token into cookie
+  const cookieOptions: CookieOptions = {
+    secure: true,
+    sameSite: 'none',
+    httpOnly: true,
+  };
 
-  const cookieOptions = {
-    secure: config.env === 'production',
+  res.cookie('refreshToken', refreshToken, cookieOptions);
+
+  sendResponse<ILoginUserResponse>(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User logged in successfully !',
+    data: others,
+  });
+});
+const adminSignIn = catchAsync(async (req: Request, res: Response) => {
+  const loginData = req.body;
+  const result = await authService.adminSignIn(loginData);
+  const { refreshToken, ...others } = result;
+
+  const cookieOptions: CookieOptions = {
+    secure: true,
+    sameSite: 'none',
     httpOnly: true,
   };
 
@@ -47,9 +65,10 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
   // set refresh token into cookie
 
-  const cookieOptions = {
-    secure: config.env === 'production',
+  const cookieOptions: CookieOptions = {
+    secure: true,
     httpOnly: true,
+    sameSite:"none",
   };
 
   res.cookie('refreshToken', refreshToken, cookieOptions);
@@ -64,4 +83,4 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
 
 
-export default { createUser, loginUser, refreshToken };
+export default { signUp, loginUser, refreshToken, adminSignIn };

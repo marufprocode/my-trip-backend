@@ -1,23 +1,19 @@
 import { Schema, model } from 'mongoose';
-import { IUser, UserModel, UserStaticModel } from './users.interface';
-import { userRoleEnum } from './user.constants';
-import ApiError from '../../../errors/errors.apiError';
-import httpStatus from 'http-status';
+import { IUser, UserModel } from './users.interface';
 import bcrypt from 'bcrypt';
 import config from '../../../config';
+import { ENUM_USER_ROLE } from '../../../shared/enums/usersEnum';
 
-const userSchema = new Schema<IUser, Record<string, unknown>, UserStaticModel>(
+const userSchema = new Schema<IUser, Record<string, unknown>, UserModel>(
   {
-    phoneNumber: { type: String, required: true, unique: true },
-    role: { type: String, enum: userRoleEnum, required: true },
-    password: { type: String, required: true, select: 0 },
     name: {
       firstName: { type: String, required: true },
       lastName: { type: String, required: true },
     },
-    address: { type: String, required: true },
-    budget: { type: Number, default: 0 },
-    income: { type: Number, default: 0 },
+    phone_number: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    role: { type: String, enum: Object.values(ENUM_USER_ROLE), required: true, default: ENUM_USER_ROLE.USER},
+    password: { type: String, required: true, select: 0 },
   },
   {
     timestamps: true,
@@ -28,9 +24,9 @@ const userSchema = new Schema<IUser, Record<string, unknown>, UserStaticModel>(
 );
 
 userSchema.statics.isUserExist = async function (
-  phoneNumber: string
-): Promise<Pick<IUser, 'id' | 'password' | 'role'> | null> {
-  return await User.findOne({ phoneNumber }, { id: 1, password: 1, role: 1 });
+  email: string
+): Promise<Pick<IUser, 'id' | 'password' | 'role' | 'email'> | null> {
+  return await User.findOne({ email }, { id: 1, password: 1, role: 1, email:1 });
 };
 
 userSchema.statics.isPasswordMatched = async function (
@@ -41,24 +37,20 @@ userSchema.statics.isPasswordMatched = async function (
 };
 
 userSchema.pre('save', async function (next) {
-  this.password = await bcrypt.hash(this.password, Number(config.bycrypt_salt_rounds));
-  if (this.role === 'buyer' && !(this.budget > 0)) {
-    return next(
-      new ApiError(httpStatus.BAD_REQUEST, `you must have a budget to create user as ${this.role}`)
-    );
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
+  if (user.isNew) {
+  user.password = await bcrypt.hash(user.password, Number(config.bycrypt_salt_rounds));
   }
-  // Document does not exist, proceed with the save operation
   next();
 });
 
-userSchema.pre('findOneAndUpdate', async function(next) {
-  const update = this.getUpdate() as Partial<IUser>
-  if(update.password){
+userSchema.pre('findOneAndUpdate', async function (next) {
+  const update = this.getUpdate() as Partial<IUser>;
+  if (update.password) {
     update.password = await bcrypt.hash(update.password, Number(config.bycrypt_salt_rounds));
   }
   next();
 });
-
-
 
 export const User = model<IUser, UserModel>('User', userSchema);

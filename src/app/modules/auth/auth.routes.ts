@@ -7,14 +7,19 @@ const router = express.Router();
 
 router.post(
   '/signup',
-  validateRequestZod(authValidation.createCowZodSchema),
-  authController.createUser
+  validateRequestZod(authValidation.createUserSchema),
+  authController.signUp
 );
 
 router.post(
-  '/login',
+  '/signin',
   validateRequestZod(authValidation.loginZodSchema),
   authController.loginUser
+);
+router.post(
+  '/admin-signin',
+  validateRequestZod(authValidation.loginZodSchema),
+  authController.adminSignIn
 );
 router.post(
   '/refresh-token',

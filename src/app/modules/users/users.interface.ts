@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Document, Model } from 'mongoose';
+import { ENUM_USER_ROLE } from '../../../shared/enums/usersEnum';
 
 interface UserName {
   firstName: string;
@@ -7,19 +8,16 @@ interface UserName {
 }
 
 export interface IUser extends Document{
-  phoneNumber: string;
-  role: 'buyer' | 'seller';
-  password: string;
   name: UserName;
-  address: string;
-  budget: number;
-  income: number;
-  passwords: string;
+  phone_number: string;
+  email: string;
+  role: ENUM_USER_ROLE;
+  password: string;
 }
 
 export interface UserStaticModel extends Model<IUser> {
   isPasswordMatched(givenPassword: string, savedPassword: string): Promise<boolean>;
-  isUserExist(id: string): Promise<Pick<IUser, 'id' | 'password' | 'role'>>;
+  isUserExist(email: string): Promise<Pick<IUser, '_id' | 'password' | 'role' | 'email'>>;
 }
 
 

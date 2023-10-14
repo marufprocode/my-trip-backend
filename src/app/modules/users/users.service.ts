@@ -1,50 +1,62 @@
-import { IAdmin } from '../admin/admin.interface';
-import { Admin } from '../admin/admin.model';
 import { IUser } from './users.interface';
 import { User } from './users.model';
+import mongoose from 'mongoose';
+import { UserProfile } from '../user-profile/userProfile.model';
 
 const getAllUsersFromDB = async (): Promise<IUser[] | null> => {
   const users = await User.find({});
   return users;
 };
+const createUserToDb = async (userData:IUser): Promise<IUser | null> => {
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try{
+    const createdUser = await User.create([userData], { session, select: '-password' });
+    const userProfile = {
+      user: createdUser[0]._id,
+    };
+    await UserProfile.create([userProfile], { session });
+    const user = User.findById(createdUser[0]._id)
+    await session.commitTransaction();
+    session.endSession();
+    return user;
+  }catch (error){
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
+};
 const getSingleUserFromDB = async (id: string): Promise<IUser | null> => {
   const user = await User.findById(id);
   return user;
 };
-const getMyProfileFromDB = async (
-  user: Record<string, unknown>
-): Promise<IUser | IAdmin | null> => {
-  if (user.role === 'admin') {
-    const result = await Admin.findOne({ _id: user.userId, role: user.role });
-    return result;
-  } else {
-    const result = await User.findOne({ _id: user.userId, role: user.role });
-    return result;
-  }
-};
 const deleteUserFromDB = async (id: string): Promise<IUser | null> => {
-  const user = await User.findByIdAndRemove(id);
-  return user;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try{
+    const removedUser = await User.findByIdAndRemove([id]);
+    await UserProfile.findOneAndRemove([{user:id}]);
+    await session.commitTransaction();
+    session.endSession();
+    return removedUser;
+  }catch (error){
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
 const updateUserToDB = async (id: string, data: Partial<IUser>): Promise<IUser | null> => {
   const result = await User.findByIdAndUpdate(id, data, { new: true, runValidators: true });
   return result;
 };
-const updateMyProfileToDB = async (user: Record<string, unknown>, data:Partial<IUser | IAdmin>): Promise<IUser | IAdmin | null> => {
-  if (user.role === 'admin') {
-    const result = await Admin.findByIdAndUpdate(user.userId, data, { new: true, runValidators: true }).lean();
-    return result;
-  } else {
-    const result = await User.findByIdAndUpdate(user.userId, data, { new: true, runValidators: true }).lean();
-    return result;
-  }
-};
+
 
 export default {
   getAllUsersFromDB,
   getSingleUserFromDB,
   deleteUserFromDB,
   updateUserToDB,
-  getMyProfileFromDB,
-  updateMyProfileToDB,
+  createUserToDb,
 };
