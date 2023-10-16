@@ -15,7 +15,6 @@ const serviceSchema = new Schema<IService, Record<string, unknown>, IServiceMode
     description: { type: String, required: true },
     country: { type: String, required: true },
     image: { type: String, default: null },
-
   },
   {
     timestamps: true,
