@@ -18,6 +18,10 @@ const appRoutes = [
     path: '/admins',
     route: adminRoutes,
   },
+  {
+    path: '/services',
+    route: adminRoutes,
+  },
 ];
 
 appRoutes.forEach(route => router.use(route.path, route.route));
