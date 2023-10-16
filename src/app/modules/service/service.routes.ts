@@ -8,8 +8,9 @@ import getServiceById from './controllers/getServiceById';
 import updateService from './controllers/updateService';
 
 const router = express.Router();
-router.get('/', checkAuth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), getAllService);
+
 router.post('/', checkAuth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), createService);
+router.get('/', checkAuth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), getAllService);
 router.get('/:id', checkAuth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), getServiceById);
 router.patch('/:id', checkAuth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), updateService);
 router.delete('/:id', checkAuth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), deleteService);
