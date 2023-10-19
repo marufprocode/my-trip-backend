@@ -8,7 +8,7 @@ import { IService } from "../service.interface";
 const updateService = catchAsync(async (req: Request, res: Response) => {
     const requestedData = req.body;
     const serviceId = req.params.id;
-    const result = await Service.findByIdAndUpdate(serviceId, requestedData)
+    const result = await Service.findByIdAndUpdate(serviceId, requestedData, {new:true})
     sendResponse<IService>(res, {
       statusCode: httpStatus.OK,
       success: true,
