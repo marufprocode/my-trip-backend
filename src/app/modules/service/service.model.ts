@@ -6,7 +6,7 @@ const serviceSchema = new Schema<IService, Record<string, unknown>, IServiceMode
     service: { type: String, enum: Object.values(SERVICE_TYPE), required: true },
     name: { type: String, required: true },
     from: { type: String, required: true },
-    to: { type: String, required: true },
+    to: { type: String, required: false },
     startDate: { type: Date, required: true },
     price: { type: Number, required: true },
     capacity: { type: Number, required: true },

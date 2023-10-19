@@ -14,7 +14,7 @@ export interface IService {
     service: SERVICE_TYPE;
     name: string;
     from: string;
-    to: string;
+    to?: string;
     startDate: Date;
     price: number;
     capacity: number;
