@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 
 
 // using cors
-app.use(cors());
+app.use(cors({origin:['http://localhost:3000'], credentials:true}));
 
 //parser
 app.use(express.json());

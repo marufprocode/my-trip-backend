@@ -125,7 +125,7 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
   const { userId } = verifiedToken;
 
   // checking deleted user's refresh token
-  const isUserExist = await User.findById(userId, {id:1, role:1});;
+  const isUserExist = await User.findById(userId);;
 
   if (!isUserExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
@@ -142,6 +142,7 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
 
   return {
     accessToken: newAccessToken,
+    user:isUserExist,
   };
 };
 

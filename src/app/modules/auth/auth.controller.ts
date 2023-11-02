@@ -5,6 +5,7 @@ import { IUser } from '../users/users.interface';
 import httpStatus from 'http-status';
 import authService from './auth.service';
 import { ILoginUserResponse, IRefreshTokenResponse } from './auth.interface';
+import ApiError from '../../../errors/errors.apiError';
 
 const signUp = catchAsync(async (req: Request, res: Response) => {
   const user = req.body;
@@ -80,7 +81,22 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const logoutUser = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+
+  if(!refreshToken){
+    throw new ApiError(httpStatus.NOT_ACCEPTABLE, "No refresh token")
+  }
+
+  res.clearCookie('refreshToken');
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'user logged out successfully',
+  });
+});
 
 
 
-export default { signUp, loginUser, refreshToken, adminSignIn };
+export default { signUp, loginUser, refreshToken, adminSignIn, logoutUser };

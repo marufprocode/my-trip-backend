@@ -17,11 +17,15 @@ router.post(
   authController.loginUser
 );
 router.post(
+  '/logout',
+  authController.logoutUser
+);
+router.post(
   '/admin-signin',
   validateRequestZod(authValidation.loginZodSchema),
   authController.adminSignIn
 );
-router.post(
+router.get(
   '/refresh-token',
   validateRequestZod(authValidation.refreshTokenZodSchema),
   authController.refreshToken
