@@ -81,6 +81,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
 
